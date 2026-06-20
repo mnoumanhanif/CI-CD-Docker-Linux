@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Make Scripts Executable
+        run: |
+          chmod +x scripts/check-env.sh
+          chmod +x scripts/build-report.sh
+
+      - name: Run Environment Check
+        run: bash scripts/check-env.sh
+
+      - name: Generate Report
+        run: bash scripts/build-report.sh
+
+      - name: Verify Dockerfile Exists
+        run: test -f app/Dockerfile
+
+      - name: Verify Website Exists
+        run: test -f app/index.html
+
+      - name: Build Docker Image
+        run: |
+          docker build -t first-test-app ./app
+
+      - name: Verify Docker Image Created
+        run: |
+          docker images | grep first-test-app
